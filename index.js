@@ -17,3 +17,9 @@ const app = new App({
       console.log(err)
   }
 })();
+
+// Listens to incoming messages that contain "goodbye"
+app.message('goodbye', async ({ message, say }) => {
+    // say() sends a message to the channel where the event was triggered
+    await say(`See ya later, <@${message.user}> :wave:`);
+  });
