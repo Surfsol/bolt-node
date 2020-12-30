@@ -1,55 +1,27 @@
-const { App } = require('@slack/bolt');
+const { WebClient } = require('@slack/web-api');
+const { createEventAdapter } = require('@slack/events-api');
 require('dotenv').config()
 
-const app = new App({
-  signingSecret: process.env.SIGNING_SECRET,
-  token: process.env.TOKEN
+const slackSigningSecret = process.env.SIGNING_SECRET;
+const slackToken = process.env.TOKEN;
+const port = process.env.SLACK_PORT || 4390;
+
+const slackEvents = createEventAdapter(slackSigningSecret);
+const slackClient = new WebClient(slackToken);
+
+slackEvents.on('app_mention', (event) => {
+  console.log(`Got message from user ${event.user}: ${event.text}`);
+  (async () => {
+    try {
+      await slackClient.chat.postMessage({ channel: event.channel, text: `Hello <@${event.user}>! :tada:` })
+    } catch (error) {
+      console.log(error.data)
+    }
+  })();
 });
 
-// Listens to incoming messages that contain "hello"
-app.message('hello', async ({ message, say }) => {
-    // say() sends a message to the channel where the event was triggered
-    await say({
-      blocks: [
-        {
-          "type": "section",
-          "text": {
-            "type": "mrkdwn",
-            "text": `Hey there <@${message.user}>!`
-          },
-          "accessory": {
-            "type": "button",
-            "text": {
-              "type": "plain_text",
-              "text": "Click Me"
-            },
-            "action_id": "button_click"
-          }
-        }
-      ],
-      text: `Hey there <@${message.user}>!`
-    });
-  });
-  
-  app.action('button_click', async ({ body, ack, say }) => {
-    // Acknowledge the action
-    await ack();
-    await say(`<@${body.user.id}> clicked the button`);
-  });
+slackEvents.on('error', console.error);
 
-// Listens to incoming messages that contain "goodbye"
-app.message('goodbye', async ({ message, say }) => {
-    // say() sends a message to the channel where the event was triggered
-    await say(`See ya later, <@${message.user}> :wave:`);
-  });
-
-(async () => {
-  // Start the app
-  try {
-  await app.start(process.env.PORT || 3000);
-  console.log('⚡️ Bolt app is running!');
-  }catch(err){
-      console.log(err)
-  }
-})();
-
+slackEvents.start(port).then(() => {
+  console.log(`Server started on port ${port}`)
+});
