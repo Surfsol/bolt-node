@@ -4,7 +4,7 @@ require('dotenv').config()
 
 const slackSigningSecret = process.env.SIGNING_SECRET;
 const slackToken = process.env.TOKEN;
-const port = process.env.SLACK_PORT || 4390;
+const port = process.env.PORT || 4390;
 
 const slackEvents = createEventAdapter(slackSigningSecret);
 const slackClient = new WebClient(slackToken);
