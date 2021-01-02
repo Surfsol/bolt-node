@@ -59,7 +59,7 @@ slackEvents.on("app_mention", (event) => {
       try {
         await slackClient.chat.postMessage({
           channel: event.channel,
-          blocks: blockData,
+          text: `Hello <@${event.user}>! :tada:`,
         });
       } catch (error) {
         console.log(error.data);
