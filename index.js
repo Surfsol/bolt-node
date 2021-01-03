@@ -6,7 +6,9 @@ const slackSigningSecret = process.env.SIGNING_SECRET;
 const slackToken = process.env.TOKEN;
 const port = process.env.PORT || 4390;
 
-const slackEvents = createEventAdapter(slackSigningSecret);
+const slackEvents = createEventAdapter(slackSigningSecret, {
+  includeBody: true,
+});
 const slackClient = new WebClient(slackToken);
 
 const url = "https://github.com";
